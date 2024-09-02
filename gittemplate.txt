@@ -1,0 +1,54 @@
+####
+# Specify the OS you want to run the Docker container in
+# For the latest version of Ubuntu, use:
+# FROM ubuntu:latest
+# Learn more about this Ubuntu image, and versions (tags):
+# https://hub.docker.com/_/ubuntu
+####
+FROM ubuntu:22.04
+
+#####
+# Variables to change before building your image
+#
+# Define the version of Python to install
+# For example "3.11" will get the latest version of 3.11 (ex 3.11.4, 3.11.5, etc)
+ARG PYVER="3.11"
+
+# Define the username and email you will use for Git
+ARG GITUSERNAME="Your Username"
+ARG GITEMAIL="your.email@yourdomain.com"
+#####
+
+# These settings prevent a timezone prompt when Python installs
+# Use this article to find your time zone (TZ):
+# https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+ENV TZ=US/Pacific \
+    DEBIAN_FRONTEND=noninteractive
+
+# Update the apt repo
+RUN apt-get update
+
+# Install Python (software-properties-common), Git, and Python utilities
+# Learn about the deadsnakes Personal Package Archives, hosted by Ubuntu: 
+# https://www.youtube.com/watch?v=Xe40amojaXE
+RUN apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get install -y python$PYVER \
+    python3-pip \
+    git-all
+
+# Upgrade packages to the latest version
+RUN apt-get -y upgrade
+
+# Update PIP (Python's package manager)
+RUN python3 -m pip install --upgrade pip
+
+# Configure git
+RUN git config --global user.name "$GITUSERNAME" &&\
+    git config --global user.email $GITEMAIL &&\
+    git config --global init.defaultBranch main
+
+# Set PYVER as the default Python interpreter
+RUN update-alternatives --install /usr/bin/python3 python /usr/bin/python$PYVER 1
+RUN update-alternatives --set python /usr/bin/python$PYVER
+RUN update-alternatives --set python /usr/bin/python$PYVER
